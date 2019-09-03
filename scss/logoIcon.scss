@@ -1,0 +1,130 @@
+//
+// @author      OA Wu <comdan66@gmail.com>
+// @copyright   Copyright (c) 2015 - 2019, Ginkgo
+// @license     http://opensource.org/licenses/MIT  MIT License
+// @link        https://www.ioa.tw/
+//
+
+@import "Ginkgo";
+
+body {
+  position: relative;
+
+  display: inline-block;
+  width: 100%;
+
+  margin: 0;
+  padding: 0;
+  color: rgba(90, 90, 90, 1.00);
+
+  font-size: medium;
+  text-align: center;
+  font-family: "微軟正黑體", "Open sans", "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif;
+  
+  // 文字染色，背景色、文字色
+  @include selection(rgba(120, 186, 255, 1.00), rgba(255, 255, 255, 1));
+  background-color: rgba(79, 129, 198, 1.00);
+}
+#logo {
+  position: fixed;
+  left: calc(50% - #{(512px / 2)});
+  top: calc(50% - #{(512px / 2)});
+  display: inline-block;
+  width: 512px;
+  height: 512px;
+  @include border-radius(50%);
+  background-color: white;
+  overflow: hidden;
+}
+
+#a {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: inline-block;
+  width: 512px;
+  height: 512px;
+  @include transform(translate(-50%, -50%) rotate(15deg) scale(.75));
+}
+
+#heand {
+  position: absolute;
+  left: 16px - 8px;
+  top: 8px - 7px;
+  display: inline-block;
+  width: 720px + 8px;
+  height: 720px + 8px;
+  background-color: rgba(44, 65, 100, 1.00);
+  // border: 6px solid rgba(44, 65, 100, 1.00);
+  // @include rotateZ(-45deg);
+  @include border-radius(720px / 2);
+  // @include rotateX(36deg);
+  // @include rotate3d(rotateX(36deg) rotateZ(-45deg));
+  @include transform(rotateZ(45deg) rotateX(36deg));
+  // @include box-shadow(10px 10px 40px rgba(0, 0, 0, .3));
+}
+
+#heand2 {
+  position: absolute;
+  left: 16px;
+  top: 8px;
+  display: inline-block;
+  width: 720px;
+  height: 720px;
+  background-color: rgba(100, 196, 237, 1.00);
+  // border: 6px solid rgba(44, 65, 100, 1.00);
+  // @include rotateZ(-45deg);
+  @include border-radius(720px / 2);
+  // @include rotateX(36deg);
+  // @include rotate3d(rotateX(36deg) rotateZ(-45deg));
+  @include transform(rotateZ(45deg) rotateX(36deg));
+  // @include box-shadow(10px 10px 40px rgba(0, 0, 0, .3));
+}
+
+.c1 {
+  position: absolute;
+  left: 210px;
+  top: 210px;
+  display: inline-block;
+  width: 320px;
+  height: 320px;
+  @include border-radius(320px / 2);
+
+  background-color: rgba(252, 250, 250, 1.00);
+  @include transform(rotateZ(-45deg) rotateX(30deg));
+
+}
+.c2 {
+  position: absolute;
+  top: 88px;
+  right: 120px;
+  display: inline-block;
+  width: 118px;
+  height: 118px;
+  background-color: rgba(252, 250, 250, 1.00);
+  @include border-radius(50%);
+  @include transform(rotateZ(-105deg) rotateX(24deg));
+}
+.c3 {
+  position: absolute;
+  bottom: 90px;
+  left: 88px;
+  display: inline-block;
+  width: 108px;
+  height: 108px;
+  background-color: rgba(252, 250, 250, 1.00);
+  @include border-radius(50%);
+  @include transform(rotateZ(10deg) rotateX(30deg));
+
+}
+.c4 {
+  position: absolute;
+  top: 150px;
+  left: 126px;
+  display: inline-block;
+  width: 140px;
+  height: 140px;
+  background-color: rgba(252, 250, 250, 1.00);
+  @include border-radius(50%);
+  @include transform(rotateZ(33deg) rotateX(20deg));
+}

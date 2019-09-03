@@ -26,7 +26,7 @@ const listObjects = (options, items, closure) => Argv.s3.listObjectsV2(options, 
   items = items.concat(data.Contents.map(t => true && {
     name: t.Key,
     hash: t.ETag.replace(/^('|")(.*)\1/g, '$2'),
-  }))
+  })).filter(t => !t.name.match(/^json\//g) && !t.name.match(/^u\//g));
 
   if (!data.IsTruncated)
     return Display.line(items.length) && Display.line(true) && (Argv.s3Files = items) && closure && closure()

@@ -88,6 +88,10 @@ body {
     @include transform(translate(-50%, -50%));
     color: rgba(160, 160, 160, 1.00);
     @include text-shadow(1px 1px 1px white);
+    @include range-width(0, 450px) {
+      font-size: 20px;
+      width: 100%;
+    };
   }
   &[data-error]:not([data-error='']) {
     &:before {
@@ -115,11 +119,14 @@ body {
 
   &:before {
     @extend %-icon;
-    @extend %-element1;
+    // @extend %-element1;
 
     position: absolute;
     left: 0;
     top: 0;
+    right: 0;
+    bottom: 0;
+
     font-size: 18px;
     color: rgba(111, 111, 111, 1.00);
     @include transition(color .3s);
@@ -139,7 +146,6 @@ body {
   width: $elementSize;
   height: $elementSize * 2 + 1px;
   @include transition(right .3s);
-  
 
   &:before {
     content: '';
@@ -178,6 +184,13 @@ body {
     right: 16px;
     @include opacity(1);
   }
+
+  @include range-width(0, 450px) {
+    bottom: 8px;
+    &.show {
+      right: 8px;
+    }
+  };
 }
 #at {
   @extend %-element1;
@@ -196,54 +209,167 @@ body {
     right: 16px;
     @include opacity(1);
   }
+
+  @include range-width(0, 450px) {
+    bottom: 8px + $elementSize * 2 + 1px + 8px;
+    &.show {
+      right: 8px;
+    }
+  };
 }
-#length {
+
+#updateAt, #elapsed, #length, #stops {
   @extend %-element2;
-  right: 16px + $elementSize + 8px;
-  bottom: -24px;
-  height: 24px;
-  line-height: 24px;
-  padding: 0 8px;
+  left: 16px;
+  
+  bottom: -28px;
+  height: 28px;
+  line-height: 28px;
+
+  padding: 0;
+  padding-right: 12px;
+  padding-left: 36px + 8px - 8px;
   @include opacity(0);
   @include transition(bottom .3s, opacity .3s);
+  @include border-right-radius(28px / 2);
 
   &:before, &:after {
     display: inline-block;
     font-size: 10px;
     color: rgba(90, 90, 90, .75);
-    margin-top: 1px;
   }
   &:before {
-    content: '累計：';
+    @extend %-icon;
+    position: absolute;
+    left: -8px;
+    top: calc(50% - #{(36px / 2)});
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    background-color: white;
+    @include border-radius(50%);
+    @include box-shadow(0 1px 4px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.2));
+
     margin-right: 4px;
-  }
-  &:after {
-    content: '公里';
-    margin-left: 4px;
+    font-size: 24px;
   }
   &.show {
     bottom: 16px;
     @include opacity(1);
   }
+
+  @include range-width(0, 450px) {
+    bottom: -24px;
+    height: 24px;
+    line-height: 24px;
+
+    left: 12px;
+    font-size: 10px;
+    @include border-right-radius(24px / 2);
+
+    &:after {
+      margin-top: 0;
+    }
+    &.show {
+      bottom: 10px;
+    }
+  };
 }
+#updateAt {
+  &:before {
+    content: '\f0006';
+  }
+}
+#elapsed {
+  &:before {
+    content: '\f0007';
+  }
+  &.show {
+    bottom: 16px + 28px + 20px;
+    @include opacity(1);
+  }
+  @include range-width(0, 450px) {
+    &.show {
+      bottom: 10px + 24px + 16px;
+    }
+  }
+}
+#length {
+  &:before {
+    content: '\f0008';
+  }
+  &:after {
+    content: '公里';
+    margin-left: 4px;
+    margin-top: 1px;
+  }
+  &.show {
+    bottom: 16px + 28px + 20px + 28px + 20px;
+    @include opacity(1);
+  }
+  @include range-width(0, 450px) {
+    &.show {
+      bottom: 10px + 24px + 16px + 24px + 16px;
+    }
+  };
+}
+#stops {
+  &:before {
+    content: '\f0009';
+  }
+  &:before {
+    font-size: 16px;
+  }
+  &:after {
+    content: '次';
+    margin-left: 4px;
+    margin-top: 1px;
+  }
+  &.show {
+    bottom: 16px + 28px + 20px + 28px + 20px + 28px + 20px;
+    @include opacity(1);
+  }
+  @include range-width(0, 450px) {
+    &.show {
+      bottom: 10px + 24px + 16px + 24px + 16px + 24px + 16px;
+    }
+  };
+}
+
 #speeds {
-  $h: 28px;
+  @extend %-element1;
   @extend %-element2;
-  height: 0;
-  left: 16px;
-  bottom: 16px;
+  @extend %-element3;
+  // height: 0;
+
+  right: -$elementSize;
+  top: -$elementSize;
+
   overflow: hidden;
+
   @include opacity(0);
-  @include transition(opacity .3s, height .3s);
-  
+  @include transition(opacity .3s, right .3s, top .3s, height .3s, width .3s);
+
+  &:before {
+    content: '\f0005';
+    z-index: 9;
+    background-color: white;
+    font-size: 24px;
+    @include opacity(1);
+    @include transition(opacity .3s);
+  }
+
+  $h: 28px;
   b {
+    position: relative;
+    z-index: 1;
     display: block;
     height: $h;
     line-height: $h;
-    padding: 0 8px;
+    padding: 0;
     font-size: 10px;
     color: white;
-    background-color: rgba(0, 0, 255, 0.2);
+    text-align: center;
     
     @for $i from 1 through length($colors) {
       &:nth-child(#{$i}) {
@@ -256,16 +382,109 @@ body {
       margin-left: 4px;
       color: rgba(255, 255, 255, .75);
       font-weight: normal;
-      @include scale(.75);
+      // @include scale(.75);
     }
   }
 
   &.show {
+    right: 16px;
+    top: 16px;
     @include opacity(1);
-    @for $i from 1 through length($colors) {
-      &.n#{$i} {
-        height: $h * $i;
+
+    &.click {
+      width: 64px;
+      &:before {
+        @include opacity(0);
       }
+
+      @for $i from 1 through length($colors) {
+        &[n="#{$i}"] {
+          height: $h * $i;
+        }
+      }
+    }
+  }
+
+  @include range-width(0, 450px) {
+    b {
+      &:after {
+        display: none;
+      }
+    }
+    &.show {
+      right: 8px;
+      top: 8px;
+
+      &.click {
+        width: $elementSize;
+      }
+    }
+  };
+}
+
+#status {
+  background-color: rgba(0, 0, 0, .4);
+
+  left: 16px;
+  top: -28px;
+  height: 28px;
+  line-height: 28px;
+  padding: 0 12px;
+  padding-left: (28px - 14px) / 2;
+  @include opacity(0);
+  @include border-radius(28px / 2);
+  @include transition(top .3s, opacity .3s);
+
+  &[status] {
+    &:before, &:after {
+      content: '';
+      display: inline-block;
+    }
+    &:before {
+      width: 14px;
+      height: 14px;
+      margin-top: (28px - 14px) / 2;
+      @include border-radius(50%);
+    }
+    &:after {
+      color: white;
+      margin-left: (28px - 14px) / 2;
+      @include text-shadow(0 0 1px rgba(0, 0, 0, .3));
+    }
+
+    &[status='true'] {
+      &:before {
+        background-color: rgba(247, 62, 62, 1.00);
+        border: 1px solid white;
+        @include animation(fadeRed .7s cubic-bezier(.39, .575, .565, 1) infinite alternate);
+      }
+      &:after {
+        content: '移動中';
+        font-weight: bold;
+      }
+    }
+    &[status='false'] {
+      &:before {
+        // border: 1px solid rgba(0, 0, 0, .3);
+        border: 1px solid rgba(255, 255, 255, .73);
+        background-color: rgba(100, 196, 237, 1.00);
+      }
+      &:after {
+        content: '已結束';
+      }
+    }
+  }
+
+  &.show {
+    top: 16px;
+    @include opacity(1);
+  }
+
+  @include range-width(0, 450px) {
+    left: 8px;
+    font-size: 10px;
+    &.show {
+      top: 8px;
     }
   }
 }
@@ -352,8 +571,16 @@ body {
     @include rotate(360deg);
   }
 }
+@include keyframes(fadeRed) {
+  0% {
+    @include opacity(.7);
+  }
+  100% {
+    @include opacity(1);
+  }
+}
 
-.OAMarker {
+.signalMarker {
   display: inline-block;
   width: 14px;
   height: 14px;
@@ -362,6 +589,8 @@ body {
   background-color: rgba(79, 129, 199, 1.00);
   color: white;
   @include border-radius(50%);
+  z-index: 985;
+
   &:before {
     @extend %-icon;
     content: '\f0001';
@@ -393,10 +622,12 @@ body {
     }
   }
 }
+
 .myMarker {
   display: inline-block;
   width: 16px;
   height: 16px;
+  z-index: 995;
 
   &:before, &:after {
     content: '';
@@ -417,7 +648,7 @@ body {
     top: (16px - 44px) / 2;
     border: 1px solid rgba(65, 131, 224, .500);
     @include opacity(.35);
-    @include animation(c 2s infinite cubic-bezier(0.145, 0.670, 0.170, 0.890));
+    @include animation(myShadow 2s infinite cubic-bezier(0.145, 0.670, 0.170, 0.890));
   }
   &:after {
     border: 2px solid white;
@@ -425,7 +656,147 @@ body {
     @include box-shadow(0 0 5px rgba(0, 0, 0, .3));
   }
 }
-@include keyframes(c) {
+
+.nowMarker {
+  display: inline-block;
+  width: 44px;
+  height: 72px;
+  z-index: 999;
+
+  div {
+    position: absolute;
+    left: 0;
+    top: 8px;
+    display: inline-block;
+    width: 44px;
+    height: 44px;
+    background-color: rgba(79, 129, 198, 1.00);
+    @include border-radius(50%);
+    padding: 6px;
+    z-index: 3;
+
+    span {
+      @extend %-ginkgo-cover;
+      position: relative;
+      z-index: 4;
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 255, 0.2);
+      @include border-radius(50%);
+    }
+  }
+  &:before {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    top: 44px - 4px;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: rgba(79, 129, 198, 1.00);
+    @include transform(translate(-50%, 0) rotateY(60deg) rotateZ(45deg));
+  }
+  &:after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    bottom: 0;
+    
+    display: inline-block;
+    width: 44px;
+    height: 44px;
+    background-color: rgba(79, 129, 198, 1.00);
+
+    @include border-radius(50%);
+    @include transform(translate(0, calc(50% - 10px)) rotateX(72deg) scale(0));
+    @include animation(nowShadow 3s infinite cubic-bezier(0.145, 0.670, 0.170, 0.890));
+  }
+}
+
+.stopMarker {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  z-index: 990;
+
+  div {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px - 2px;
+    border: 1px solid white;
+    background-color: rgba(53, 176, 171, 1.00);
+    @include transform(translate(-50%, 0));
+    @include border-radius(50%);
+    &:before {
+      @extend %-icon;
+      content: '\f0009';
+      color: white;
+      font-size: 10px;
+    }
+  }
+
+  span {
+    position: absolute;
+    left: 50%;
+    top: 0 - 24px / 2;
+    display: none;
+    @include transform(translate(-50%, 0) scale(.8));
+
+    &:after {
+      content: attr(data-title);
+      position: relative;
+      z-index: 2;
+
+      display: inline-block;
+      height: 24px;
+      line-height: 24px;
+      padding: 0 8px;
+      font-size: 10px;
+      white-space: nowrap;
+      color: white;
+      background-color: rgba(79, 129, 198, 1.00);
+      @include border-radius(2px);
+    }
+    &:before {
+      position: absolute;
+      left: calc(50% - #{(10px / 2)});
+      bottom: -2px;
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background-color: rgba(79, 129, 198, 1.00);
+      content: '';
+      z-index: 1;
+      @include rotate(45deg);
+    }
+  }
+
+  &.show {
+    div {
+      background-color: transparent;
+      border: 1px solid transparent;
+      &:before {
+        display: none;
+      }
+    }
+    span {
+      display: inline-block;
+    }
+  }
+}
+
+@include keyframes(myShadow) {
   0% { background-color: rgba(65, 131, 224, 1); @include scale(0); @include opacity(1); }
   100% { background-color: rgba(65, 131, 224, 0); @include scale(1); @include opacity(0); }
+}
+@include keyframes(nowShadow) {
+  0% { @include transform(translate(0, calc(50% - 10px)) rotateX(72deg) scale(0)); @include opacity(1); }
+  100% { @include transform(translate(0, calc(50% - 10px)) rotateX(72deg) scale(1.5)); @include opacity(0); }
 }
