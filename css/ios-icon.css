@@ -1,12 +1,10 @@
 @charset "UTF-8";
-*, *:after, *:before { vertical-align: top; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; -moz-osx-font-smoothing: subpixel-antialiased; -webkit-font-smoothing: subpixel-antialiased; -moz-font-smoothing: subpixel-antialiased; -ms-font-smoothing: subpixel-antialiased; -o-font-smoothing: subpixel-antialiased; }
 
-@font-face { font-family: "icon"; src: url('../font/icomoon/fonts/icomoon.eot?1567754499') format('embedded-opentype'), url('../font/icomoon/fonts/icomoon.woff?1567754499') format('woff'), url('../font/icomoon/fonts/icomoon.ttf?1567754499') format('truetype'), url('../font/icomoon/fonts/icomoon.svg?1567754499') format('svg'); }
-body { position: relative; display: inline-block; width: 100%; margin: 0; padding: 0; color: #5a5a5a; font-size: medium; text-align: center; font-family: "微軟正黑體", "Open sans", "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; background-color: red; }
-body::-moz-selection { color: white; background-color: #78baff; }
-body::selection { color: white; background-color: #78baff; }
+/*
+ * @author      OA Wu <comdan66@gmail.com>
+ * @copyright   Copyright (c) 2015 - 2019, Ginkgo
+ * @license     http://opensource.org/licenses/MIT  MIT License
+ * @link        https://www.ioa.tw/
+ */
 
-.tabbar { display: inline-block; width: 80px; height: 80px; line-height: 80px; font-size: 72px; margin: 12px; color: #4f81c7; background-color: white; color: #5d6870; }
-
-.arrow { display: inline-block; width: 24px; height: 39px; line-height: 39px; text-align: center; font-size: 39px; background-color: #1c1c1e; position: relative; margin: 10px; }
-.arrow:before { position: absolute; font-size: 76px; left: -27px; top: -1px; color: #3a3a3c; }
+*, *:after, *:before { vertical-align: top; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; -moz-osx-font-smoothing: subpixel-antialiased; -webkit-font-smoothing: subpixel-antialiased; -moz-font-smoothing: subpixel-antialiased; -ms-font-smoothing: subpixel-antialiased; -o-font-smoothing: subpixel-antialiased; }@font-face { font-family: "icon"; src: url('../font/icomoon/fonts/icomoon.eot?1567754499') format('embedded-opentype'), url('../font/icomoon/fonts/icomoon.woff?1567754499') format('woff'), url('../font/icomoon/fonts/icomoon.ttf?1567754499') format('truetype'), url('../font/icomoon/fonts/icomoon.svg?1567754499') format('svg'); }body { position: relative; display: inline-block; width: 100%; margin: 0; padding: 0; color: #5a5a5a; font-size: medium; text-align: center; font-family: "微軟正黑體", "Open sans", "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; background-color: red; }body::-moz-selection { color: white; background-color: #78baff; }body::selection { color: white; background-color: #78baff; }.tabbar { display: inline-block; width: 80px; height: 80px; line-height: 80px; font-size: 72px; margin: 12px; color: #4f81c7; background-color: white; color: #5d6870; }.arrow { display: inline-block; width: 24px; height: 39px; line-height: 39px; text-align: center; font-size: 39px; background-color: #1c1c1e; position: relative; margin: 10px; }.arrow:before { position: absolute; font-size: 76px; left: -27px; top: -1px; color: #3a3a3c; }
