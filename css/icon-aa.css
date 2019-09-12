@@ -1,0 +1,14 @@
+@font-face { font-family: "icon-aa"; src: url('../font/aa/fonts/icomoon.eot?1567955286') format('embedded-opentype'), url('../font/aa/fonts/icomoon.woff?1567955286') format('woff'), url('../font/aa/fonts/icomoon.ttf?1567955286') format('truetype'), url('../font/aa/fonts/icomoon.svg?1567955286') format('svg'); }
+*[class^="icon-aa-"]:before, *[class*=" icon-aa-"]:before { font-family: "icon-aa"; speak: none; font-style: normal; font-weight: normal; font-variant: normal; }
+
+.icon-aa-4:before { content: "\f0004"; }
+
+.icon-aa-5:before { content: "\f0005"; }
+
+.icon-aa-6:before { content: "\f0006"; }
+
+.icon-aa-3:before { content: "\f0003"; }
+
+.icon-aa-2:before { content: "\f0002"; }
+
+.icon-aa-1:before { content: "\f0001"; }

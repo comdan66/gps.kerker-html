@@ -4,7 +4,7 @@
 .nowMarker div span { background-size: cover; background-position: center center; background-repeat: no-repeat; overflow: hidden; }
 .nowMarker div span > img { display: inline-block; max-width: 100%; max-height: 100%; filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0); opacity: 0; }
 
-@font-face { font-family: "icon"; src: url('../font/icomoon/fonts/icomoon.eot?1567650036') format('embedded-opentype'), url('../font/icomoon/fonts/icomoon.woff?1567650036') format('woff'), url('../font/icomoon/fonts/icomoon.ttf?1567650036') format('truetype'), url('../font/icomoon/fonts/icomoon.svg?1567650036') format('svg'); }
+@font-face { font-family: "icon"; src: url('../font/icomoon/fonts/icomoon.eot?1567754499') format('embedded-opentype'), url('../font/icomoon/fonts/icomoon.woff?1567754499') format('woff'), url('../font/icomoon/fonts/icomoon.ttf?1567754499') format('truetype'), url('../font/icomoon/fonts/icomoon.svg?1567754499') format('svg'); }
 #zoom :before, #at:before, #speeds:before, #updateAt:before, #elapsed:before, #length:before, #stops:before, .signalMarker:before, .stopMarker div:before { font-family: "icon"; speak: none; font-style: normal; font-weight: normal; font-variant: normal; }
 
 body { position: relative; display: inline-block; width: 100%; margin: 0; padding: 0; color: #5a5a5a; font-size: medium; text-align: center; font-family: "微軟正黑體", "Open sans", "Helvetica Neue", HelveticaNeue, Helvetica, Arial, sans-serif; }
