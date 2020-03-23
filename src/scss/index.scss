@@ -8,28 +8,547 @@
 @import "_/_init";
 @import "_/_public";
 
-#map-panel {
-  display: inline-block;
-  width: 100%;
-  height: 100%;
+$elementSize: 40px;
+$colors: (
+  adjust-lightness(rgba(254, 220, 69, 1.00), -15%),
+  adjust-lightness(rgba(253, 208, 77, 1.00), -15%),
+  adjust-lightness(rgba(253, 197, 86, 1.00), -15%),
+  adjust-lightness(rgba(253, 186, 95, 1.00), -15%),
+  adjust-lightness(rgba(252, 175, 104, 1.00), -15%),
+  adjust-lightness(rgba(252, 163, 113, 1.00), -15%),
+  adjust-lightness(rgba(251, 151, 122, 1.00), -15%),
+  adjust-lightness(rgba(251, 140, 131, 1.00), -15%),
+  adjust-lightness(rgba(251, 129, 140, 1.00), -15%),
+  adjust-lightness(rgba(250, 117, 150, 1.00), -15%)
+);
+
+
+#loading {
   position: fixed;
+
   top: 0;
   left: 0;
-}
-#map {
-  position: absolute !important;
-  left: 0;
-  top: 0;
-  
+
   display: inline-block;
   width: 100%;
   height: 100%;
 
+  background-color: rgba(0, 0, 0, .3);
+  z-index: 999;
+
+  span {
+    &, &:before, &:after {
+      position: absolute;
+      display: inline-block;
+      background-color: white;
+    }
+
+    $size: 24px;
+    $border: 4px;
+    $height: 52px;
+    $space: ($height - $size) / 2;
+
+    top: 50%;
+    left: 50%;
+    height: $height;
+    line-height: $height;
+
+    padding-left: $space + $size + $space;
+    padding-right: $space + $space / 2;
+    z-index: 999;
+
+    @include opacity(1);
+    @include border-radius(12px);
+    @include box-shadow(0 6px 8px -4px rgba(0, 0, 0, .2), 0 4px 19px 2px rgba(0, 0, 0, .14), 0 5px 24px 4px rgba(0, 0, 0, .12));
+
+    &:before, &:after {
+      content: '';
+      @include border-radius(50%);
+    }
+
+    &:before {
+      top: calc(50% - #{$size / 2});
+      left: $space;
+      width: $size;
+      height: $size;
+
+      @include background-image(linear-gradient(
+        rgba(59, 243, 156, 1.00) 0%,
+        rgba(51, 224, 175, 1.00) 33%,
+        rgba(42, 202, 200, 1.00) 67%,
+        rgba(34, 181, 228, 1.00) 100%));
+
+      @include animation(rotate 1s linear infinite);
+      @include box-shadow(inset 0 0 2px rgba(0, 0, 0, .3));
+    }
+    &:after {
+      top: calc(50% - #{($size - $border * 2) / 2});
+      left: $space + $border;
+      width: $size - $border * 2;
+      height: $size - $border * 2;
+      @include box-shadow(0 0 3px rgba(0, 0, 0, .3));
+    }
+  }
+  
+  span {
+    @include transform(translate(-50%, -50%) scale(1));
+    @include transition(transform .3s cubic-bezier(.175, .885, .32, 1.275));
+  }
+  
+  &.hide span {
+    @include transform(translate(-50%, -50%) scale(0));
+    @include transition(transform .3s cubic-bezier(.68, -0.275, .825, 0.115));
+  }
 }
-.aa {
-  border: 1px solid rgba(255, 0, 0, .3);
-  // @include transition(width .3s);
-  // @include transition(width .3s);
+
+@include keyframes(rotate) {
+  100% {
+    @include rotate(360deg);
+  }
+}
+
+#main {
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+
+  > * {
+    position: fixed !important;
+    z-index: 2;
+  }
+}
+
+#error {
+  left: 50%;
+  top: 50%;
   
+  display: inline-block;
+  height: 64px;
+  line-height: 64px;
+  font-size: 32px;
+  font-weight: bold;
+  color: rgba(160, 160, 160, 1.00);
+
+  @include transform(translate(-50%, -50%));
+  @include text-shadow(1px 1px 1px white);
+  @include range-width(0, 450px) {
+    font-size: 20px;
+    width: 100%;
+  };
+}
+
+#map {
+  position: fixed !important;
+  left: 0;
+  top: 0;
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  z-index: 1 !important;
+  background-color: rgba(242, 241, 240, 1.00);
+
+  .gmnoprint.gm-bundled-control, .gm-style-cc, a[href^="http://maps.google.com/maps"], a[href^="https://maps.google.com/maps"] {
+    display: none !important;
+  }
+}
+
+%-element1 {
+  width: $elementSize;
+  height: $elementSize;
+  line-height: $elementSize;
+}
+%-element2 {
+  background-color: rgba(255, 255, 255, 1.00);
+  @include border-radius(3px);
+  @include box-shadow(0 1px 4px rgba(0, 0, 0, 0.3));
+}
+%-element3 {
+  cursor: pointer;
+
+  &:before {
+    @extend %-icon;
+    // @extend %-element1;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    font-size: 18px;
+    color: rgba(111, 111, 111, 1.00);
+    @include transition(color .3s);
+  }
+  &:hover {
+    &:before {
+      color: rgba(50, 50, 50, 1);
+    }
+  }
+}
+
+#zoom {
+  @extend %-element1;
+  @extend %-element2;
+  bottom: 16px;
+  right: -$elementSize;
+
+  width: $elementSize;
+  height: $elementSize * 2 + 1px;
+  @include transition(right .3s);
+
+  &:before {
+    content: '';
+
+    position: absolute;
+    top: $elementSize;
+    left: 8px;
+    right: 8px;
+    
+    display: inline-block;
+    height: 1px;
+
+    background-color: rgba(220, 220, 220, 1.00);
+  }
+
+  * {
+    position: relative;
+    display: inline-block;
+
+    @extend %-element1;
+    @extend %-element3;
+
+    &:before {
+      font-weight: bold;
+      content: '\f0002';
+    }
+    + * {
+      margin-top: 1px;
+      &:before {
+        content: '\f0003';
+      }
+    }
+  }
+
+  &.show {
+    right: 16px;
+    @include opacity(1);
+  }
+
+  @include range-width(0, 450px) {
+    bottom: 8px;
+    &.show {
+      right: 8px;
+    }
+  };
+}
+#at {
+  @extend %-element1;
+  @extend %-element2;
+  @extend %-element3;
   
+  right: -$elementSize;
+  bottom: 16px + $elementSize * 2 + 1px + 8px;
+  @include opacity(0);
+  @include transition(right .3s, opacity .3s);
+
+  &:before {
+    content: '\f0004';
+  }
+
+  &.show {
+    right: 16px;
+    @include opacity(1);
+  }
+
+  @include range-width(0, 450px) {
+    bottom: 8px + $elementSize * 2 + 1px + 8px;
+    &.show {
+      right: 8px;
+    }
+  };
+}
+
+#updateAt, #elapsed, #length, #stops {
+  @extend %-element2;
+  
+
+  left: 16px;
+  
+  bottom: -28px;
+  height: 28px;
+  line-height: 28px;
+
+  padding: 0;
+  padding-right: 12px;
+  padding-left: 36px + 8px - 8px;
+  @include opacity(0);
+  @include transition(bottom .3s, opacity .3s);
+  @include border-right-radius(28px / 2);
+
+  &:before, &:after {
+    display: inline-block;
+    font-size: 10px;
+    color: rgba(90, 90, 90, .75);
+  }
+  &:before {
+    @extend %-icon;
+    position: absolute;
+    left: -8px;
+    top: calc(50% - #{(36px / 2)});
+    width: 36px;
+    height: 36px;
+    line-height: 36px;
+    background-color: white;
+    @include border-radius(50%);
+    @include box-shadow(0 1px 4px rgba(0, 0, 0, 0.3), 0 0 2px rgba(0, 0, 0, 0.2));
+
+    margin-right: 4px;
+    font-size: 24px;
+  }
+  &.show {
+    bottom: 16px;
+    @include opacity(1);
+  }
+
+  @include range-width(0, 450px) {
+    bottom: -24px;
+    height: 24px;
+    line-height: 24px;
+
+    left: 12px;
+    font-size: 10px;
+    @include border-right-radius(24px / 2);
+
+    &:after {
+      margin-top: 0;
+    }
+    &.show {
+      bottom: 10px;
+    }
+  };
+}
+#updateAt {
+  &:before {
+    content: '\f0006';
+  }
+}
+#elapsed {
+  &:before {
+    content: '\f0007';
+  }
+  &.show {
+    bottom: 16px + 28px + 20px;
+    @include opacity(1);
+  }
+  @include range-width(0, 450px) {
+    &.show {
+      bottom: 10px + 24px + 16px;
+    }
+  }
+}
+#length {
+  &:before {
+    content: '\f0008';
+  }
+  &:after {
+    content: '公里';
+    margin-left: 4px;
+    margin-top: 1px;
+  }
+  &.show {
+    bottom: 16px + 28px + 20px + 28px + 20px;
+    @include opacity(1);
+  }
+  @include range-width(0, 450px) {
+    &.show {
+      bottom: 10px + 24px + 16px + 24px + 16px;
+    }
+  };
+}
+#stops {
+  &:before {
+    content: '\f0009';
+  }
+  &:before {
+    font-size: 16px;
+  }
+  &:after {
+    content: '次';
+    margin-left: 4px;
+    margin-top: 1px;
+  }
+  &.show {
+    bottom: 16px + 28px + 20px + 28px + 20px + 28px + 20px;
+    @include opacity(1);
+  }
+  @include range-width(0, 450px) {
+    &.show {
+      bottom: 10px + 24px + 16px + 24px + 16px + 24px + 16px;
+    }
+  };
+}
+
+#speeds {
+  @extend %-element1;
+  @extend %-element2;
+  @extend %-element3;
+  // height: 0;
+  
+
+  right: -$elementSize;
+  top: -$elementSize;
+
+  overflow: hidden;
+
+  @include opacity(0);
+  @include transition(opacity .3s, right .3s, top .3s, height .3s, width .3s);
+
+  &:before {
+    content: '\f0005';
+    z-index: 9;
+    background-color: white;
+    font-size: 24px;
+    @include opacity(1);
+    @include transition(opacity .3s);
+  }
+
+  $h: 28px;
+  b {
+    position: relative;
+    z-index: 1;
+    display: block;
+    height: $h;
+    line-height: $h;
+    padding: 0;
+    font-size: 10px;
+    color: white;
+    text-align: center;
+    
+    @for $i from 1 through length($colors) {
+      &:nth-child(#{$i}) {
+        background-color: nth($colors, $i);
+      }
+    }
+    &:after {
+      content: 'Km/h';
+      display: inline-block;
+      margin-left: 4px;
+      color: rgba(255, 255, 255, .75);
+      font-weight: normal;
+      // @include scale(.75);
+    }
+  }
+
+  &.show {
+    right: 16px;
+    top: 16px;
+    @include opacity(1);
+
+    &.click {
+      width: 64px;
+      &:before {
+        @include opacity(0);
+      }
+
+      @for $i from 1 through length($colors) {
+        &[n="#{$i}"] {
+          height: $h * $i;
+        }
+      }
+    }
+  }
+
+  @include range-width(0, 450px) {
+    b {
+      &:after {
+        display: none;
+      }
+    }
+    &.show {
+      right: 8px;
+      top: 8px;
+
+      &.click {
+        width: $elementSize;
+      }
+    }
+  };
+}
+
+#status {
+  background-color: rgba(0, 0, 0, .4);
+
+  left: 16px;
+  top: -28px;
+  height: 28px;
+  line-height: 28px;
+  padding: 0 12px;
+  padding-left: (28px - 14px) / 2;
+  @include opacity(0);
+  @include border-radius(28px / 2);
+  @include transition(top .3s, opacity .3s);
+
+  &[status] {
+    &:before, &:after {
+      content: '';
+      display: inline-block;
+    }
+    &:before {
+      width: 14px;
+      height: 14px;
+      margin-top: (28px - 14px) / 2;
+      @include border-radius(50%);
+    }
+    &:after {
+      color: white;
+      margin-left: (28px - 14px) / 2;
+      @include text-shadow(0 0 1px rgba(0, 0, 0, .3));
+    }
+
+    &[status='moving'] {
+      &:before {
+        background-color: rgba(247, 62, 62, 1.00);
+        border: 1px solid white;
+        @include animation(fadeRed .7s cubic-bezier(.39, .575, .565, 1) infinite alternate);
+      }
+      &:after {
+        content: '移動中';
+        font-weight: bold;
+      }
+    }
+    &[status='finish'] {
+      &:before {
+        border: 1px solid rgba(255, 255, 255, .73);
+        background-color: rgba(100, 196, 237, 1.00);
+      }
+      &:after {
+        content: '已結束';
+      }
+    }
+    &[status='no-signal'] {
+      &:before {
+        border: 1px solid rgba(255, 255, 255, .73);
+        background-color: rgba(30, 178, 166, 1.00);
+      }
+      &:after {
+        content: '訊號錯誤';
+      }
+    }
+  }
+
+  &.show {
+    top: 16px;
+    @include opacity(1);
+  }
+
+  @include range-width(0, 450px) {
+    left: 8px;
+    font-size: 10px;
+    &.show {
+      top: 8px;
+    }
+  }
 }
