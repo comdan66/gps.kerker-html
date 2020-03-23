@@ -72,5 +72,27 @@ const GoogleMap = {
 
 
 $(_ => {
+  
+  // GoogleMap.init([''], _ => {
 
+  //   var mapPanelVm = new Vue({
+  //     el: '#map-panel',
+  //     date: {
+  //       map: null
+  //     },
+  //     mounted () {
+
+  //       this.map = new google.maps.Map(
+  //         this.$refs.map, {
+  //           zoom: 14,
+  //           center: new google.maps.LatLng(23.77133806905457, 120.70937982351438),
+  //           clickableIcons: false,
+  //           disableDefaultUI: true,
+  //           gestureHandling: 'greedy'
+  //         })
+
+  //     } 
+  //   })
+
+  // })
 })
