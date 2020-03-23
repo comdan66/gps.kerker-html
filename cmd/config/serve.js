@@ -32,9 +32,9 @@ module.exports = {
       cert: 'server.crt', // base path: cmd/config/https/
     },
 
-    domain: '127.0.0.1',
-    minPort: 8000,
-    maxPort: 8999,
+    domain: 'dev.gps.kerker.tw',
+    minPort: 8090,
+    maxPort: 8090,
     defaultPort: null,
     utf8Exts: ['.html', '.css', '.js', '.json', '.text'] // 採用 utf8 編碼的副檔名
   },
