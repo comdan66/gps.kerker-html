@@ -78,6 +78,60 @@ window.El = str => {
   return els.map(t => t.toString()).join('')
 }
 
+window.Params = {
+  val: {},
+  init (sets) {
+    window.location.hash.substr(1).split('&').forEach(val => {
+      var splitter = val.split('=')
+      if (splitter.length != 2) return
+      var k = decodeURIComponent(splitter[0])
+      var v = decodeURIComponent(splitter[1])
+      if (k.slice(-2) == '[]')
+        if (!this.val[k = k.slice(0, -2)])
+          this.val[k] = [v]
+        else
+          this.val[k].push(v)
+      else
+        this.val[k] = v
+    })
+
+    for (var k in sets)
+      this.val[k] = this.val[k]
+        ? this.val[k]
+        : sets[k]
+
+    return this
+  },
+  update (k, v, c) {
+    if (typeof this.val[k] === 'undefined')
+      return
+
+    this.val[k] = v
+    
+    var str = []
+    for (var t in this.val)
+      str.push(t + '=' + this.val[t])
+
+    window.location.hash = str.join ('&')
+    typeof c === 'function' && c()
+    return this
+  },
+  remove (k, c) {
+    if (typeof this.val[k] === 'undefined')
+      return true
+    
+    delete this.val[k]
+
+    var str = []
+    for (var t in this.val)
+      t != k && str.push(t + '=' + this.val[t])
+
+    window.location.hash = str.join('&')
+    typeof c === 'function' && c()
+    return this
+  }
+}
+
 const Marker = function(parentEl) {
   if (!(this instanceof Marker)) return new Marker(parentEl)
   
@@ -85,14 +139,13 @@ const Marker = function(parentEl) {
   this.left     = 0
   this.width    = 0
   this.height   = 0
-  this.map      = null // google maps obj
-  this.html     = null // html str
-  this.click    = null // () => {}
-  this.class    = null // 'str', {name: true}, ['str'], ['str', {name: true}]
-  this.position = null // map position
-  this.css      = {} // {backgroundColor: ''}
+  this.map      = null
+  this.html     = null
+  this.click    = null
+  this.class    = null
+  this.position = null
+  this.css      = {}
 
-  // private setting
   this.parentEl = !(parentEl instanceof HTMLElement) ? parentEl instanceof Vue ? parentEl.$el : document.body : parentEl
   this.pixel    = null
 
@@ -188,17 +241,18 @@ const Load = new Vue({
 })
 
 API.key = {
-  url: 'http://dev.api-gps.kerker.tw/api/f2e/event/key',
+  url: window.API_URL + 'event/key',
   format: response => typeof response == 'object' && Array.isArray(response) && response.length,
 }
 
 API.event = {
-  url: 'http://dev.api-gps.kerker.tw/api/f2e/event/1',
+  url: id => window.API_URL + 'event/' + id,
   format: response => typeof response == 'object',
 }
 
 Load.main({
   data: {
+    id: null,
     map: null,
     error: null,
     zoomShow: false,
@@ -209,15 +263,23 @@ Load.main({
     idleTimer: null,
     markersData: [],
     polylinesData: [],
+    liveTimer: null,
     nowMarker: null,
     colors: ['#f5c801', '#fbbb03', '#fcab0a', '#fc9913', '#fb871d', '#fa7226', '#f95d30', '#f94739', '#f93748', '#f72b5e']
   },
   mounted () {
+    Params.init({ id: null })
+
+    if (!Params.val.id)
+      return Load.closeLoading(_ => this.error = 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
+    else
+      this.id = Params.val.id
+
     API('key').done(keys => GoogleMap.init(keys, _ => {
       this.map = new google.maps.Map(
         this.$refs.map, {
-          zoom: 14,
-          center: new google.maps.LatLng(23.77133806905457, 120.70937982351438),
+          zoom: 15,
+          center: new google.maps.LatLng(25.0329694, 121.5654177),
           clickableIcons: false,
           disableDefaultUI: true,
           gestureHandling: 'greedy'
@@ -239,21 +301,21 @@ Load.main({
           var bounds = new google.maps.LatLngBounds();
           for (var i in this.signals) bounds.extend(new google.maps.LatLng(this.signals[i].lat, this.signals[i].lng));
           this.map.fitBounds(bounds);
+        } else if (this.signals.length == 1) {
+          this.map.setCenter(new google.maps.LatLng(this.signals[0].lat, this.signals[0].lng))
+          this.map.setZoom(15)
         }
         
-        // this.show.status = true
+        $('title').text(this.data.title + ' - ' + $('title').text())
+        this.data.live && (this.liveTimer = setInterval(this.get, 3000))
       })
     }))
     .fail(error => this.error = typeof error == 'object' && typeof error.responseJSON == 'object' && typeof error.responseJSON.messages == 'object' && Array.isArray(error.responseJSON.messages) && error.responseJSON.messages.length ? error.responseJSON.messages.join(', ') : 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
     .send()
   },
   computed: {
-    status () {
-      return this.data ? this.data.status : null
-    },
-    length () {
-      return this.data ? this.data.length : null
-    },
+    status () { return this.data ? this.data.status : null },
+    length () { return this.data ? this.data.length : null },
     elapsed () {
       if (!this.data) return null
       let elapsed = this.data.elapsed
@@ -288,7 +350,6 @@ Load.main({
         units.push(elapsed + '秒')
 
       return units.reverse().join(' ')
-
     },
     updateAt () {
       if (!this.data) return null
@@ -384,8 +445,6 @@ Load.main({
         this.nowMarker.map = this.map
         this.nowMarker.position = new google.maps.LatLng(this.signals[this.signals.length - 1].lat, this.signals[this.signals.length - 1].lng)
       }
-
-
     },
     speedLevel (speed) {
       for (var i in this.speeds) if (speed <= this.speeds[i]) return parseInt(i, 10)
@@ -394,8 +453,13 @@ Load.main({
     zoomIn () { return this.map.setZoom(this.map.zoom + 1) },
     zoomOut () { return this.map.setZoom(this.map.zoom - 1) },
     get (func) {
-      return API('event')
-        .done(data => (this.data = data, this.fetch(), typeof func == 'function' && func()))
+      return API('event', this.id)
+        .done(data => {
+          this.data = data
+          this.fetch()
+          data.live || clearInterval(this.liveTimer)
+          typeof func == 'function' && func()
+        })
         .fail(error => this.error = typeof error == 'object' && typeof error.responseJSON == 'object' && typeof error.responseJSON.messages == 'object' && Array.isArray(error.responseJSON.messages) && error.responseJSON.messages.length ? error.responseJSON.messages.join(', ') : 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
         .okla(Load.closeLoading)
         .send()
@@ -439,18 +503,19 @@ Load.main({
   template: El(`
     main#main
       div#error => *if=error   *text=error
-      div#map => ref=map
+      template => *else
+        div#map => ref=map
 
-      label#at => :class={ show: false }
-      div#updateAt => :class={ show: updateAt !== null }   *text=updateAt
-      div#length => :class={ show: length !== null }   *text=length
-      div#elapsed => :class={ show: elapsed !== null }   *text=elapsed
-      div#status => :class={ show: status }   :status=status
+        label#at => :class={ show: false }
+        div#updateAt => :class={ show: updateAt !== null }   *text=updateAt
+        div#length => :class={ show: length !== null }   *text=length
+        div#elapsed => :class={ show: elapsed !== null }   *text=elapsed
+        div#status => :class={ show: status }   :status=status
 
-      div#zoom => :class={ show: zoomShow }
-        label => @click=zoomIn
-        label => @click=zoomOut
-      div#speeds => :class={ show: speeds.length, click: speedsClick }   @click=speedsClick=!speedsClick   :n=speeds.length
-        b => *for=(speed, i) in speeds   :key=i   *text=speed   :style={backgroundColor: colors[i]}
+        div#zoom => :class={ show: zoomShow }
+          label => @click=zoomIn
+          label => @click=zoomOut
+        div#speeds => :class={ show: speeds.length, click: speedsClick }   @click=speedsClick=!speedsClick   :n=speeds.length
+          b => *for=(speed, i) in speeds   :key=i   *text=speed   :style={backgroundColor: colors[i]}
         `)
 })

@@ -121,7 +121,8 @@ const addSocket = data => {
 const showPHP = (response, port, file) => Exec('php ' + Path.phpEntry +
   ' --path ' + file +
   ' --env Development' +
-  ' --base-url ' + (Config.server.https.enable ? 'https' : 'http') + '://' + Config.server.domain + ':' + port + '/', { maxBuffer: 1024 * 500 }, (error, stdout, stderr) => {
+  ' --base-url ' + (Config.server.https.enable ? 'https' : 'http') + '://' + Config.server.domain + ':' + port + '/'
+  , { maxBuffer: 1024 * 500 }, (error, stdout, stderr) => {
   response.writeHead(error ? 400 : 200, {'Content-Type': 'text/html; charset=UTF-8'})
   response.write(addSocket(stdout))
   response.end()

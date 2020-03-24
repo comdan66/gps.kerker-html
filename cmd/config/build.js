@@ -10,7 +10,7 @@ module.exports = {
     dest: 'dist',
     entry: 'src'
   },
-  minify: false,
+  minify: true,
   ignorePermission: false,
   allowExts: [
     '.php', '.html', '.css', '.js', '.eot', '.svg', '.ttf', '.woff', '.png', '.jpg', '.jpeg', '.gif', '.svg'

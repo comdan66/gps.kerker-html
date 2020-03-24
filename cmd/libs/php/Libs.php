@@ -135,7 +135,7 @@ if (!function_exists('defineVAR')) {
     define('JS_URL',   BASE_URL . 'js/');
     define('FONT_URL', BASE_URL . 'font/');
 
-    define('TITLE', 'Ginkgo!');
+    define('TITLE', '👣 我的足跡');
     define('SEPARATE', ' - ');
   }
 }
