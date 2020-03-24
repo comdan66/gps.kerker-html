@@ -205,7 +205,9 @@ Load.main({
     speedsShow: false,
     speedsClick: false,
     data: null,
+    firstMove: false,
     lastZoom: null,
+    idleTime: 5500,
     idleTimer: null,
     markersData: [],
     polylinesData: [],
@@ -239,17 +241,8 @@ Load.main({
         this.zoomShow = true
 
         this.get(_ => {
-          if (this.signals.length >= 2) {
-            var bounds = new google.maps.LatLngBounds();
-            for (var i in this.signals) bounds.extend(new google.maps.LatLng(this.signals[i].lat, this.signals[i].lng));
-            this.map.fitBounds(bounds);
-          } else if (this.signals.length == 1) {
-            this.map.setCenter(new google.maps.LatLng(this.signals[0].lat, this.signals[0].lng))
-            this.map.setZoom(15)
-          }
-          
           $('title').text(this.data.title + ' - ' + $('title').text())
-          this.data.live && (this.liveTimer = setInterval(this.get, 3000))
+          this.data.live && (this.liveTimer = setInterval(this.get, this.idleTime))
         })
       }))
       .fail(error => this.error = typeof error == 'object' && typeof error.responseJSON == 'object' && typeof error.responseJSON.messages == 'object' && Array.isArray(error.responseJSON.messages) && error.responseJSON.messages.length ? error.responseJSON.messages.join(', ') : 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
@@ -401,6 +394,20 @@ Load.main({
           this.data = data
           this.fetch()
           data.live || clearInterval(this.liveTimer)
+
+          if (!this.firstMove) {
+            if (data.signals.length >= 2) {
+              var bounds = new google.maps.LatLngBounds();
+              for (var i in data.signals) bounds.extend(new google.maps.LatLng(data.signals[i].lat, data.signals[i].lng));
+              this.map.fitBounds(bounds);
+              this.firstMove = true
+            } else if (data.signals.length == 1) {
+              this.map.setCenter(new google.maps.LatLng(data.signals[0].lat, data.signals[0].lng))
+              this.map.setZoom(15)
+              this.firstMove = true
+            }
+          }
+
           typeof func == 'function' && func()
         })
         .fail(error => this.error = typeof error == 'object' && typeof error.responseJSON == 'object' && typeof error.responseJSON.messages == 'object' && Array.isArray(error.responseJSON.messages) && error.responseJSON.messages.length ? error.responseJSON.messages.join(', ') : 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
