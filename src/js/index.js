@@ -78,18 +78,19 @@ window.El = str => {
   return els.map(t => t.toString()).join('')
 }
 
-const Marker = function(map, parentEl) {
-  if (!(this instanceof Marker)) return new Marker(map, parentEl)
+const Marker = function(parentEl) {
+  if (!(this instanceof Marker)) return new Marker(parentEl)
   
   this.top      = 0
   this.left     = 0
   this.width    = 0
   this.height   = 0
-  this.map      = map || null // google maps obj
+  this.map      = null // google maps obj
   this.html     = null // html str
   this.click    = null // () => {}
   this.class    = null // 'str', {name: true}, ['str'], ['str', {name: true}]
   this.position = null // map position
+  this.css      = {} // {backgroundColor: ''}
 
   // private setting
   this.parentEl = !(parentEl instanceof HTMLElement) ? parentEl instanceof Vue ? parentEl.$el : document.body : parentEl
@@ -100,6 +101,7 @@ const Marker = function(map, parentEl) {
     computed: {
       className () { return this.class },
       style () { return this.pixel && this.$el ? {
+        ...this.css,
         position: 'absolute', display: 'inline-block',
         top: (this.pixel.y - (this.height || this.$el.offsetHeight) / 2) + this.top + 'px',
         left: (this.pixel.x - (this.width || this.$el.offsetWidth) / 2) + this.left + 'px',
@@ -178,7 +180,7 @@ const Load = new Vue({
   methods: {
     main (func) { return $(() => this.mount(func)) },
     mount (func) { return this.$el || document.body.appendChild(this.$mount().$el), setTimeout(_ => (this.hide = false, setTimeout(_ => document.body.appendChild(new Vue(func).$mount().$el), 300)), 300) },
-    closeLoading (func) { return this.hide = true, setTimeout(_ => (this.display = false, typeof func == 'function' && func()), 300) },
+    closeLoading (func) { return !this.hide ? (this.hide = true, setTimeout(_ => (this.display = false, typeof func == 'function' && func()), 300)) : null },
   },
   template: El(`
     div#loading => *if=display   :class={hide: hide}
@@ -188,7 +190,6 @@ const Load = new Vue({
 API.key = {
   url: 'http://dev.api-gps.kerker.tw/api/f2e/event/key',
   format: response => typeof response == 'object' && Array.isArray(response) && response.length,
-  done: response => response.shift()
 }
 
 API.event = {
@@ -198,37 +199,219 @@ API.event = {
 
 Load.main({
   data: {
-    error: null
+    map: null,
+    error: null,
+    zoomShow: false,
+    speedsShow: false,
+    speedsClick: false,
+    data: null,
+    lastZoom: null,
+    idleTimer: null,
+    markersData: [],
+    polylinesData: [],
+    nowMarker: null,
+    colors: ['#f5c801', '#fbbb03', '#fcab0a', '#fc9913', '#fb871d', '#fa7226', '#f95d30', '#f94739', '#f93748', '#f72b5e']
   },
   mounted () {
-    API('key').done(_ => API('event')
-      .done(r => {
-        console.error(r);
+    API('key').done(keys => GoogleMap.init(keys, _ => {
+      this.map = new google.maps.Map(
+        this.$refs.map, {
+          zoom: 14,
+          center: new google.maps.LatLng(23.77133806905457, 120.70937982351438),
+          clickableIcons: false,
+          disableDefaultUI: true,
+          gestureHandling: 'greedy'
+        })
+      this.map.mapTypes.set('ms', new google.maps.StyledMapType([{stylers: [{gamma: 0}, {weight: 0.75}] }, {featureType: 'all', stylers: [{ visibility: 'on' }]}, {featureType: 'administrative', stylers: [{ visibility: 'on' }]}, {featureType: 'landscape', stylers: [{ visibility: 'on' }]}, {featureType: 'poi', stylers: [{ visibility: 'on' }]}, {featureType: 'road', stylers: [{ visibility: 'simplified' }]}, {featureType: 'road.arterial', stylers: [{ visibility: 'on' }]}, {featureType: 'transit', stylers: [{ visibility: 'on' }]}, {featureType: 'water', stylers: [{ color: '#b3d1ff', visibility: 'on' }]}, {elementType: "labels.icon", stylers:[{ visibility: 'off' }]}]));
+      this.map.setMapTypeId('ms');
+      
+      this.map.addListener('idle', _ => {
+        if (this.map.zoom === this.lastZoom) return
+        else this.lastZoom = this.map.zoom
+        clearTimeout(this.idleTimer)
+        this.idleTimer = setTimeout(this.fetch, 300)
+      });
+
+      this.zoomShow = true
+
+      this.get(_ => {
+        if (this.signals.length >= 2) {
+          var bounds = new google.maps.LatLngBounds();
+          for (var i in this.signals) bounds.extend(new google.maps.LatLng(this.signals[i].lat, this.signals[i].lng));
+          this.map.fitBounds(bounds);
+        }
         
+        // this.show.status = true
       })
-      .fail(error => this.error = typeof error == 'object' && typeof error.responseJSON == 'object' && typeof error.responseJSON.messages == 'object' && Array.isArray(error.responseJSON.messages) && error.responseJSON.messages.length ? error.responseJSON.messages.join(', ') : 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
-      .okla(Load.closeLoading)
-      .send())
+    }))
     .fail(error => this.error = typeof error == 'object' && typeof error.responseJSON == 'object' && typeof error.responseJSON.messages == 'object' && Array.isArray(error.responseJSON.messages) && error.responseJSON.messages.length ? error.responseJSON.messages.join(', ') : 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
     .send()
+  },
+  computed: {
+    length () {
+      return this.data ? this.data.length : null
+    },
+    updateAt () {
+      if (!this.data) return null
+      
+      var range = new Date().getTime() / 1000 - this.data.updateAt, formats = [{base: 10, format: '剛剛'}, {base: 6, format: '不到 1 分鐘'}, {base: 60, format: ' 分鐘前'}, {base: 24, format: ' 小時前'}, {base: 30, format: ' 天前'}, {base: 12, format: ' 個月前'}], unit = 1, tmp = 0
+
+      for (var i = 0; i < formats.length; i++, unit = tmp) {
+        tmp = formats[i].base * unit;
+        if (range < tmp) return (i > 1 ? parseInt(range / unit, 10) : '') + formats[i].format
+      }
+
+      return parseInt(range / unit, 10) + ' 年前'
+    },
+    signals () {
+      return this.data ? this.data.signals.map(signal => {
+        signal.speedLevel = this.speedLevel(signal.speed)
+        signal.courseLevel = Math.round(signal.course / 10)
+        return signal
+      }) : []
+    },
+    speeds () {
+      let speeds = this.data ? this.data.signals.map(signal => signal.speed).filter(speed => speed > 0) : []
+      let max = null, min = null
+      for (var i in speeds) {
+        if (max === null || speeds[i] > max) max = Math.ceil(speeds[i])
+        if (min === null || speeds[i] < min) min = Math.ceil(speeds[i])
+      }
+
+      let newSpeeds = []
+      let unit = Math.round((max - min) / 9)
+      unit = unit < 1 ? 1 : unit
+      for (var i = min; i < max; i += unit) newSpeeds.push(i);
+      newSpeeds.length < 10 && newSpeeds.push(max)
+
+      return newSpeeds
+    },
+    polylines: {
+      set (vals) {
+        if (!Array.isArray(vals)) return
+        this.polylinesData.forEach(polyline => polyline instanceof google.maps.Polyline && polyline.setMap(null))
+        this.polylinesData = []
+
+        for (var i = 1; i < vals.length; i++)
+          this.polylinesData.push(new google.maps.Polyline({
+            map: this.map,
+            strokeWeight: 5,
+            strokeColor: this.colors[vals[i - 1].speedLevel],
+            path: [new google.maps.LatLng(vals[i - 1].lat, vals[i - 1].lng), new google.maps.LatLng(vals[i].lat, vals[i].lng)]
+          }));
+      },
+      get () {
+        return this.polylinesData
+      }
+    },
+    markers: {
+      set (vals) {
+        if (!Array.isArray(vals)) return
+        this.markersData.forEach(marker => marker instanceof Marker && marker.setMap(null))
+        this.markersData = vals.map(val => {
+          let marker = Marker()
+          marker.map = this.map
+          marker.position = new google.maps.LatLng(val.lat, val.lng)
+          marker.css    = { backgroundColor: this.colors[val.speedLevel] }
+          marker.class  = ['marker', 'course-' + val.courseLevel]
+          marker.width  = 14
+          marker.height = 14
+          return marker
+        })
+      },
+      get () {
+        return this.markersData
+      }
+    }
+  },
+  methods: {
+    fetch () {
+      this.markerCluster(this.signals, this.map.zoom, 1, true, markers => {
+        this.markers = markers.map(markers => markers[0])
+        this.polylines = markers.map(markers => markers[0])
+      })
+      if (this.nowMarker === null) {
+        this.nowMarker = Marker()
+        this.nowMarker.width = 44
+        this.nowMarker.height = (44 + 5)
+        this.nowMarker.top = -(44 + 5) / 2
+        this.nowMarker.class = 'nowMarker'
+        this.nowMarker.html = '<div><span></span></div>'
+      }
+      if (!this.signals.length) {
+        this.nowMarker.map = null
+        this.nowMarker.position = null
+      } else {
+        this.nowMarker.map = this.map
+        this.nowMarker.position = new google.maps.LatLng(this.signals[this.signals.length - 1].lat, this.signals[this.signals.length - 1].lng)
+      }
+
+
+    },
+    speedLevel (speed) {
+      for (var i in this.speeds) if (speed <= this.speeds[i]) return parseInt(i, 10)
+      return 0
+    },
+    zoomIn () { return this.map.setZoom(this.map.zoom + 1) },
+    zoomOut () { return this.map.setZoom(this.map.zoom - 1) },
+    get (func) {
+      return API('event')
+        .done(data => (this.data = data, this.fetch(), typeof func == 'function' && func()))
+        .fail(error => this.error = typeof error == 'object' && typeof error.responseJSON == 'object' && typeof error.responseJSON.messages == 'object' && Array.isArray(error.responseJSON.messages) && error.responseJSON.messages.length ? error.responseJSON.messages.join(', ') : 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
+        .okla(Load.closeLoading)
+        .send()
+    },
+    markerCluster (objs, zoom, unit, isLine, func) {
+      if (!objs.length)
+        return func && func([]) || []
+
+      var ts = {},
+          ns = [],
+          tl = isLine ? objs.length - 1 : objs.length
+
+      for (var i = 0; i < objs.length; i++) {
+        if (typeof ts[i] !== 'undefined')
+          continue
+
+        ts[i] = true
+        var t = [objs[i]]
+
+        for (var j = i + 1; j < tl; j++) {
+          if (typeof ts[j] !== 'undefined')
+            if (isLine) break
+            else continue
+
+          var d = Math.max(Math.abs(objs[i].lat - objs[j].lat), Math.abs(objs[i].lng - objs[j].lng))
+
+          if (30 / Math.pow(2, zoom) / unit <= d)
+            if (isLine) break
+            else continue
+
+          ts[j] = true
+          t.push(objs[j])
+        }
+        ns.push(t)
+      }
+
+      ts = null
+      return func && func(ns) || ns
+    },
   },
   template: El(`
     main#main
       div#error => *if=error   *text=error
-      div#map
-      div#zoom.show
-        label
-        label
-      label#at.show
-      div#updateAt.show
-      div#elapsed.show
-      div#length.show
-      div#stops.show
-      div#speeds.show.click => :n=3
-        b => *text=1
-        b => *text=1
-        b => *text=1
-      div#status.show => :status='no-signal'
+      div#map => ref=map
+
+      label#at => :class={ show: false }
+      div#updateAt => :class={ show: updateAt !== null }   *text=updateAt
+      div#length => :class={ show: length !== null }   *text=length
+      div#status => :class={ show: false }   :status='no-signal'
+
+      div#zoom => :class={ show: zoomShow }
+        label => @click=zoomIn
+        label => @click=zoomOut
+      div#speeds => :class={ show: speeds.length, click: speedsClick }   @click=speedsClick=!speedsClick   :n=speeds.length
+        b => *for=(speed, i) in speeds   :key=i   *text=speed   :style={backgroundColor: colors[i]}
         `)
 })
 

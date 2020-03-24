@@ -8,6 +8,22 @@
 @import "_/_init";
 @import "_/_public";
 
+@import "compass/css3/font-face";
+
+@include font-face("icon", font-files(
+  "icomoon/fonts/icomoon.eot",
+  "icomoon/fonts/icomoon.woff",
+  "icomoon/fonts/icomoon.ttf",
+  "icomoon/fonts/icomoon.svg"));
+
+%-icon {
+  font-family: "icon";
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+}
+
 $elementSize: 40px;
 $colors: (
   adjust-lightness(rgba(254, 220, 69, 1.00), -15%),
@@ -273,8 +289,6 @@ $colors: (
 
 #updateAt, #elapsed, #length, #stops {
   @extend %-element2;
-  
-
   left: 16px;
   
   bottom: -28px;
@@ -341,7 +355,6 @@ $colors: (
   }
   &.show {
     bottom: 16px + 28px + 20px;
-    @include opacity(1);
   }
   @include range-width(0, 450px) {
     &.show {
@@ -359,12 +372,13 @@ $colors: (
     margin-top: 1px;
   }
   &.show {
-    bottom: 16px + 28px + 20px + 28px + 20px;
-    @include opacity(1);
+    bottom: 16px + 28px + 20px;
+    // bottom: 16px + 28px + 20px + 28px + 20px;
   }
   @include range-width(0, 450px) {
     &.show {
-      bottom: 10px + 24px + 16px + 24px + 16px;
+      bottom: 10px + 24px + 16px;
+      // bottom: 10px + 24px + 16px + 24px + 16px;
     }
   };
 }
@@ -382,7 +396,6 @@ $colors: (
   }
   &.show {
     bottom: 16px + 28px + 20px + 28px + 20px + 28px + 20px;
-    @include opacity(1);
   }
   @include range-width(0, 450px) {
     &.show {
@@ -390,6 +403,10 @@ $colors: (
     }
   };
 }
+
+
+
+
 
 #speeds {
   @extend %-element1;
@@ -427,11 +444,11 @@ $colors: (
     color: white;
     text-align: center;
     
-    @for $i from 1 through length($colors) {
-      &:nth-child(#{$i}) {
-        background-color: nth($colors, $i);
-      }
-    }
+    // @for $i from 1 through length($colors) {
+    //   &:nth-child(#{$i}) {
+    //     background-color: nth($colors, $i);
+    //   }
+    // }
     &:after {
       content: 'Km/h';
       display: inline-block;
@@ -453,7 +470,7 @@ $colors: (
         @include opacity(0);
       }
 
-      @for $i from 1 through length($colors) {
+      @for $i from 1 through 10 {
         &[n="#{$i}"] {
           height: $h * $i;
         }
@@ -477,6 +494,7 @@ $colors: (
     }
   };
 }
+
 
 #status {
   background-color: rgba(0, 0, 0, .4);
@@ -551,4 +569,102 @@ $colors: (
       top: 8px;
     }
   }
+}
+.marker {
+  line-height: 14px;
+  color: white;
+  background-color: rgba(79, 129, 199, 1.00);
+  z-index: 985;
+  @include border-radius(50%);
+
+  &:before {
+    @extend %-icon;
+    content: '\f0001';
+
+    position: absolute;
+    left: calc(50% - #{(16px / 2)});
+    top: calc(50% - #{(16px / 2)});
+
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+
+    font-size: 10px;
+    @include scale(.8);
+  }
+
+  @include transition(transform .3s);
+  @include rotate(0);
+  @for $i from 0 through 36 {
+    &.course-#{$i} {
+      @include rotate($i * 10deg);
+    }
+  }
+  
+  // @for $i from 1 through length($colors) {
+  //   &.speed-#{$i - 1} {
+  //     background-color: nth($colors, $i);
+  //   }
+  // }
+}
+
+.nowMarker {
+  z-index: 999;
+
+  div {
+    position: absolute;
+    left: 0;
+    bottom: 2px + 3px;
+    display: inline-block;
+    width: 44px;
+    height: 44px;
+    background-color: rgba(79, 129, 198, 1.00);
+    @include border-radius(50%);
+    padding: 6px;
+    z-index: 3;
+
+    span {
+      @extend %-ginkgo-cover;
+      position: relative;
+      z-index: 4;
+      display: inline-block;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 255, 0.2);
+      @include border-radius(50%);
+    }
+  }
+  &:before {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    bottom: 2px;
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: rgba(79, 129, 198, 1.00);
+    @include transform(translate(-50%, 0) rotate(45deg));
+  }
+  &:after {
+    content: '';
+    position: absolute;
+    z-index: 1;
+    left: 0;
+    bottom: -22px;
+    
+    display: inline-block;
+    width: 44px;
+    height: 44px;
+    background-color: rgba(79, 129, 198, 1.00);
+
+    @include border-radius(50%);
+    @include transform(rotateX(72deg) scale(0));
+    @include animation(nowShadow 3s infinite cubic-bezier(0.145, 0.670, 0.170, 0.890));
+  }
+}
+@include keyframes(nowShadow) {
+  0% { @include transform(rotateX(72deg) scale(0)); @include opacity(1); }
+  100% { @include transform(rotateX(72deg) scale(1.5)); @include opacity(0); }
 }
