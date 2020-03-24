@@ -78,60 +78,6 @@ window.El = str => {
   return els.map(t => t.toString()).join('')
 }
 
-// window.Params = {
-//   val: {},
-//   init (sets) {
-//     window.location.hash.substr(1).split('&').forEach(val => {
-//       var splitter = val.split('=')
-//       if (splitter.length != 2) return
-//       var k = decodeURIComponent(splitter[0])
-//       var v = decodeURIComponent(splitter[1])
-//       if (k.slice(-2) == '[]')
-//         if (!this.val[k = k.slice(0, -2)])
-//           this.val[k] = [v]
-//         else
-//           this.val[k].push(v)
-//       else
-//         this.val[k] = v
-//     })
-
-//     for (var k in sets)
-//       this.val[k] = this.val[k]
-//         ? this.val[k]
-//         : sets[k]
-
-//     return this
-//   },
-//   update (k, v, c) {
-//     if (typeof this.val[k] === 'undefined')
-//       return
-
-//     this.val[k] = v
-    
-//     var str = []
-//     for (var t in this.val)
-//       str.push(t + '=' + this.val[t])
-
-//     window.location.hash = str.join ('&')
-//     typeof c === 'function' && c()
-//     return this
-//   },
-//   remove (k, c) {
-//     if (typeof this.val[k] === 'undefined')
-//       return true
-    
-//     delete this.val[k]
-
-//     var str = []
-//     for (var t in this.val)
-//       t != k && str.push(t + '=' + this.val[t])
-
-//     window.location.hash = str.join('&')
-//     typeof c === 'function' && c()
-//     return this
-//   }
-// }
-
 const Marker = function(parentEl) {
   if (!(this instanceof Marker)) return new Marker(parentEl)
   
@@ -252,8 +198,8 @@ API.event = {
 
 Load.main({
   data: {
-    id: null,
     map: null,
+    token: null,
     error: null,
     zoomShow: false,
     speedsShow: false,
@@ -268,50 +214,47 @@ Load.main({
     colors: ['#f5c801', '#fbbb03', '#fcab0a', '#fc9913', '#fb871d', '#fa7226', '#f95d30', '#f94739', '#f93748', '#f72b5e']
   },
   mounted () {
-    Params.init({ id: null })
+    this.token = window.location.search.replace(/^\?/, '').split('&').map(t => t.trim()).shift()
 
-    if (!Params.val.id)
-      return Load.closeLoading(_ => this.error = 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
-    else
-      this.id = Params.val.id
-
-    API('key').done(keys => GoogleMap.init(keys, _ => {
-      this.map = new google.maps.Map(
-        this.$refs.map, {
-          zoom: 15,
-          center: new google.maps.LatLng(25.0329694, 121.5654177),
-          clickableIcons: false,
-          disableDefaultUI: true,
-          gestureHandling: 'greedy'
-        })
-      this.map.mapTypes.set('ms', new google.maps.StyledMapType([{stylers: [{gamma: 0}, {weight: 0.75}] }, {featureType: 'all', stylers: [{ visibility: 'on' }]}, {featureType: 'administrative', stylers: [{ visibility: 'on' }]}, {featureType: 'landscape', stylers: [{ visibility: 'on' }]}, {featureType: 'poi', stylers: [{ visibility: 'on' }]}, {featureType: 'road', stylers: [{ visibility: 'simplified' }]}, {featureType: 'road.arterial', stylers: [{ visibility: 'on' }]}, {featureType: 'transit', stylers: [{ visibility: 'on' }]}, {featureType: 'water', stylers: [{ color: '#b3d1ff', visibility: 'on' }]}, {elementType: "labels.icon", stylers:[{ visibility: 'off' }]}]));
-      this.map.setMapTypeId('ms');
-      
-      this.map.addListener('idle', _ => {
-        if (this.map.zoom === this.lastZoom) return
-        else this.lastZoom = this.map.zoom
-        clearTimeout(this.idleTimer)
-        this.idleTimer = setTimeout(this.fetch, 300)
-      });
-
-      this.zoomShow = true
-
-      this.get(_ => {
-        if (this.signals.length >= 2) {
-          var bounds = new google.maps.LatLngBounds();
-          for (var i in this.signals) bounds.extend(new google.maps.LatLng(this.signals[i].lat, this.signals[i].lng));
-          this.map.fitBounds(bounds);
-        } else if (this.signals.length == 1) {
-          this.map.setCenter(new google.maps.LatLng(this.signals[0].lat, this.signals[0].lng))
-          this.map.setZoom(15)
-        }
+    return this.token
+      ? API('key').done(keys => GoogleMap.init(keys, _ => {
+        this.map = new google.maps.Map(
+          this.$refs.map, {
+            zoom: 15,
+            center: new google.maps.LatLng(25.0329694, 121.5654177),
+            clickableIcons: false,
+            disableDefaultUI: true,
+            gestureHandling: 'greedy'
+          })
+        this.map.mapTypes.set('ms', new google.maps.StyledMapType([{stylers: [{gamma: 0}, {weight: 0.75}] }, {featureType: 'all', stylers: [{ visibility: 'on' }]}, {featureType: 'administrative', stylers: [{ visibility: 'on' }]}, {featureType: 'landscape', stylers: [{ visibility: 'on' }]}, {featureType: 'poi', stylers: [{ visibility: 'on' }]}, {featureType: 'road', stylers: [{ visibility: 'simplified' }]}, {featureType: 'road.arterial', stylers: [{ visibility: 'on' }]}, {featureType: 'transit', stylers: [{ visibility: 'on' }]}, {featureType: 'water', stylers: [{ color: '#b3d1ff', visibility: 'on' }]}, {elementType: "labels.icon", stylers:[{ visibility: 'off' }]}]));
+        this.map.setMapTypeId('ms');
         
-        $('title').text(this.data.title + ' - ' + $('title').text())
-        this.data.live && (this.liveTimer = setInterval(this.get, 3000))
-      })
-    }))
-    .fail(error => this.error = typeof error == 'object' && typeof error.responseJSON == 'object' && typeof error.responseJSON.messages == 'object' && Array.isArray(error.responseJSON.messages) && error.responseJSON.messages.length ? error.responseJSON.messages.join(', ') : 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
-    .send()
+        this.map.addListener('idle', _ => {
+          if (this.map.zoom === this.lastZoom) return
+          else this.lastZoom = this.map.zoom
+          clearTimeout(this.idleTimer)
+          this.idleTimer = setTimeout(this.fetch, 300)
+        });
+
+        this.zoomShow = true
+
+        this.get(_ => {
+          if (this.signals.length >= 2) {
+            var bounds = new google.maps.LatLngBounds();
+            for (var i in this.signals) bounds.extend(new google.maps.LatLng(this.signals[i].lat, this.signals[i].lng));
+            this.map.fitBounds(bounds);
+          } else if (this.signals.length == 1) {
+            this.map.setCenter(new google.maps.LatLng(this.signals[0].lat, this.signals[0].lng))
+            this.map.setZoom(15)
+          }
+          
+          $('title').text(this.data.title + ' - ' + $('title').text())
+          this.data.live && (this.liveTimer = setInterval(this.get, 3000))
+        })
+      }))
+      .fail(error => this.error = typeof error == 'object' && typeof error.responseJSON == 'object' && typeof error.responseJSON.messages == 'object' && Array.isArray(error.responseJSON.messages) && error.responseJSON.messages.length ? error.responseJSON.messages.join(', ') : 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
+      .send()
+    : Load.closeLoading(_ => this.error = 'ʕ•ᴥ•ʔ 您沒有權限看喔！')
   },
   computed: {
     status () { return this.data ? this.data.status : null },
@@ -453,7 +396,7 @@ Load.main({
     zoomIn () { return this.map.setZoom(this.map.zoom + 1) },
     zoomOut () { return this.map.setZoom(this.map.zoom - 1) },
     get (func) {
-      return API('event', this.id)
+      return API('event', this.token)
         .done(data => {
           this.data = data
           this.fetch()
