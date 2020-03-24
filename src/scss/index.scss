@@ -372,13 +372,13 @@ $colors: (
     margin-top: 1px;
   }
   &.show {
-    bottom: 16px + 28px + 20px;
-    // bottom: 16px + 28px + 20px + 28px + 20px;
+    // bottom: 16px + 28px + 20px;
+    bottom: 16px + 28px + 20px + 28px + 20px;
   }
   @include range-width(0, 450px) {
     &.show {
-      bottom: 10px + 24px + 16px;
-      // bottom: 10px + 24px + 16px + 24px + 16px;
+      // bottom: 10px + 24px + 16px;
+      bottom: 10px + 24px + 16px + 24px + 16px;
     }
   };
 }
@@ -552,7 +552,16 @@ $colors: (
         background-color: rgba(30, 178, 166, 1.00);
       }
       &:after {
-        content: '訊號錯誤';
+        content: '無任何訊號';
+      }
+    }
+    &[status='error'] {
+      &:before {
+        border: 1px solid rgba(255, 255, 255, .73);
+        background-color: rgba(30, 178, 166, 1.00);
+      }
+      &:after {
+        content: '訊號異常';
       }
     }
   }

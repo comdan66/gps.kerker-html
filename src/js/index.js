@@ -248,8 +248,47 @@ Load.main({
     .send()
   },
   computed: {
+    status () {
+      return this.data ? this.data.status : null
+    },
     length () {
       return this.data ? this.data.length : null
+    },
+    elapsed () {
+      if (!this.data) return null
+      let elapsed = this.data.elapsed
+      if (elapsed === 0)
+        return '瞬間…'
+
+      var units = []
+
+      var contitions = [
+        { base: 60, format: '秒' },
+        { base: 60, format: '分鐘' },
+        { base: 24, format: '小時' },
+        { base: 30, format: '天' },
+        { base: 12, format: '個月' },
+      ]
+
+      for (var i in contitions) {
+        var dataUnit = elapsed % contitions[i].base
+        
+        if (dataUnit != 0)
+          units.push(dataUnit + contitions[i].format)
+
+        elapsed = Math.floor(elapsed / contitions[i].base)
+        if (elapsed < 1)
+          break
+      }
+
+      if (elapsed > 0)
+        units.push(elapsed + '年')
+
+      if (units.length < 1)
+        units.push(elapsed + '秒')
+
+      return units.reverse().join(' ')
+
     },
     updateAt () {
       if (!this.data) return null
@@ -336,7 +375,7 @@ Load.main({
         this.nowMarker.height = (44 + 5)
         this.nowMarker.top = -(44 + 5) / 2
         this.nowMarker.class = 'nowMarker'
-        this.nowMarker.html = '<div><span></span></div>'
+        this.nowMarker.html = '<div><span style="background-image: url(/img/icon2-64-tiny.png)"></span></div>'
       }
       if (!this.signals.length) {
         this.nowMarker.map = null
@@ -405,7 +444,8 @@ Load.main({
       label#at => :class={ show: false }
       div#updateAt => :class={ show: updateAt !== null }   *text=updateAt
       div#length => :class={ show: length !== null }   *text=length
-      div#status => :class={ show: false }   :status='no-signal'
+      div#elapsed => :class={ show: elapsed !== null }   *text=elapsed
+      div#status => :class={ show: status }   :status=status
 
       div#zoom => :class={ show: zoomShow }
         label => @click=zoomIn
@@ -414,38 +454,3 @@ Load.main({
         b => *for=(speed, i) in speeds   :key=i   *text=speed   :style={backgroundColor: colors[i]}
         `)
 })
-
-
-
-// $(_ => {
-
-//   const main = new Vue({
-
-//   });
-  
-//   // GoogleMap.init([''], _ => {
-
-//   //   var mapPanelVm = new Vue({
-//   //     el: '#map-panel',
-//   //     date: {
-//   //       map: null
-//   //     },
-//   //     mounted () {
-
-//   //       this.map = new google.maps.Map(
-//   //         this.$refs.map, {
-//   //           zoom: 14,
-//   //           center: new google.maps.LatLng(23.77133806905457, 120.70937982351438),
-//   //           clickableIcons: false,
-//   //           disableDefaultUI: true,
-//   //           gestureHandling: 'greedy'
-//   //         })
-
-//   //     } 
-//   //   })
-
-//   // })
-// })
-
-
-
