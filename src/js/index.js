@@ -78,59 +78,59 @@ window.El = str => {
   return els.map(t => t.toString()).join('')
 }
 
-window.Params = {
-  val: {},
-  init (sets) {
-    window.location.hash.substr(1).split('&').forEach(val => {
-      var splitter = val.split('=')
-      if (splitter.length != 2) return
-      var k = decodeURIComponent(splitter[0])
-      var v = decodeURIComponent(splitter[1])
-      if (k.slice(-2) == '[]')
-        if (!this.val[k = k.slice(0, -2)])
-          this.val[k] = [v]
-        else
-          this.val[k].push(v)
-      else
-        this.val[k] = v
-    })
+// window.Params = {
+//   val: {},
+//   init (sets) {
+//     window.location.hash.substr(1).split('&').forEach(val => {
+//       var splitter = val.split('=')
+//       if (splitter.length != 2) return
+//       var k = decodeURIComponent(splitter[0])
+//       var v = decodeURIComponent(splitter[1])
+//       if (k.slice(-2) == '[]')
+//         if (!this.val[k = k.slice(0, -2)])
+//           this.val[k] = [v]
+//         else
+//           this.val[k].push(v)
+//       else
+//         this.val[k] = v
+//     })
 
-    for (var k in sets)
-      this.val[k] = this.val[k]
-        ? this.val[k]
-        : sets[k]
+//     for (var k in sets)
+//       this.val[k] = this.val[k]
+//         ? this.val[k]
+//         : sets[k]
 
-    return this
-  },
-  update (k, v, c) {
-    if (typeof this.val[k] === 'undefined')
-      return
+//     return this
+//   },
+//   update (k, v, c) {
+//     if (typeof this.val[k] === 'undefined')
+//       return
 
-    this.val[k] = v
+//     this.val[k] = v
     
-    var str = []
-    for (var t in this.val)
-      str.push(t + '=' + this.val[t])
+//     var str = []
+//     for (var t in this.val)
+//       str.push(t + '=' + this.val[t])
 
-    window.location.hash = str.join ('&')
-    typeof c === 'function' && c()
-    return this
-  },
-  remove (k, c) {
-    if (typeof this.val[k] === 'undefined')
-      return true
+//     window.location.hash = str.join ('&')
+//     typeof c === 'function' && c()
+//     return this
+//   },
+//   remove (k, c) {
+//     if (typeof this.val[k] === 'undefined')
+//       return true
     
-    delete this.val[k]
+//     delete this.val[k]
 
-    var str = []
-    for (var t in this.val)
-      t != k && str.push(t + '=' + this.val[t])
+//     var str = []
+//     for (var t in this.val)
+//       t != k && str.push(t + '=' + this.val[t])
 
-    window.location.hash = str.join('&')
-    typeof c === 'function' && c()
-    return this
-  }
-}
+//     window.location.hash = str.join('&')
+//     typeof c === 'function' && c()
+//     return this
+//   }
+// }
 
 const Marker = function(parentEl) {
   if (!(this instanceof Marker)) return new Marker(parentEl)
